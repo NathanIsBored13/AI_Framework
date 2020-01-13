@@ -1,14 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
 namespace AI_Framework
 {
-    struct LayerInfo
-    {
-        public double[,] weights;
-        public double[] biases;
-    }
     class Neural_Network
     {
         public int[] structure { get; }
@@ -31,17 +23,17 @@ namespace AI_Framework
             buffer = this.input.PropegateDown(input);
             return buffer;
         }
-        public double ComputeCost(int correct)
+        public double ComputeCost(int correct, int min, int max)
         {
             double ret = 0;
-            for (int i = 0; i < buffer.Length; i++) ret += Math.Pow(buffer[i] - (i == correct ? 1 : 0), 2);
+            for (int i = 0; i < buffer.Length; i++) ret += Math.Pow(buffer[i] - (i == correct ? min : max), 2);
             return ret;
         }
         public void Export(string location)
         {
             File_Maneger file_maneger = new File_Maneger(location);
             file_maneger.Erase();
-            Console.WriteLine("Erased folder at {0}", location);
+            Console.WriteLine($"Erased folder at {location}");
             input.Export(file_maneger);
             Console.WriteLine("Compleated export");
         }

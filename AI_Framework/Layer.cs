@@ -1,5 +1,4 @@
 ﻿using System;
-
 namespace AI_Framework
 {
     class Layer
@@ -11,7 +10,7 @@ namespace AI_Framework
         public Layer(int[] structure, int depth)
         {
             this.depth = depth;
-            Console.WriteLine("layer {0} created", depth);
+            Console.WriteLine($"layer {depth} created");
             if (depth != structure.Length - 1) child = new Layer(structure, depth + 1);
             else child = null;
             biases = new double[structure[depth]];
@@ -29,10 +28,10 @@ namespace AI_Framework
         public Layer(File_Maneger file_maneger, int depth)
         {
             this.depth = depth;
-            LayerInfo buffer = file_maneger.ReadNext();
-            weights = buffer.weights;
-            biases = buffer.biases;
-            Console.WriteLine("layer {0} loaded", depth);
+            var buffer = file_maneger.ReadNext();
+            weights = buffer.Item1;
+            biases = buffer.Item2;
+            Console.WriteLine($"layer {depth} loaded");
             if (file_maneger.IsMore()) child = new Layer(file_maneger, depth + 1);
         }
         public double[] PropegateDown(double[] activation)
@@ -52,7 +51,7 @@ namespace AI_Framework
         public void Export(File_Maneger file_Manager)
         {
             file_Manager.Export(depth, weights, biases);
-            Console.WriteLine("Exported layer {0}", depth);
+            Console.WriteLine($"Exported layer {depth}");
             if (child != null) child.Export(file_Manager);
         }
     }
