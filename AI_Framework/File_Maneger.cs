@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.IO;
+
 namespace AI_Framework
 {
     class File_Maneger
@@ -10,11 +11,13 @@ namespace AI_Framework
         private string address;
         private int pointer = 0;
         private string[] files;
+
         public File_Maneger(string address)
         {
             this.address = address;
             files = Directory.GetFiles(address, @"*.csv");
         }
+
         public int[] GetStructure()
         {
             int[] ret = new int[files.Length + 1];
@@ -29,6 +32,7 @@ namespace AI_Framework
             }
             return ret;
         }
+
         public Tuple<double[,], double[]> ReadNext()
         {
             Console.WriteLine($"read {files[pointer]}");
@@ -52,11 +56,14 @@ namespace AI_Framework
             sr.Close();
             return new Tuple<double[,], double[]>(weights, biases);
         }
+
         public bool IsMore() => pointer < files.Length;
+
         public void Erase()
         {
             foreach (string path in files) File.Delete(path);
         }
+
         public void Export(int index, double[,] weights, double[] biases)
         {
             FileStream fs = File.Create($@"{address}\LAYER-{index}.csv");
@@ -65,11 +72,13 @@ namespace AI_Framework
             Write(fs, string.Join(seperator, biases));
             fs.Close();
         }
+
         private void Write(FileStream fs, string value)
         {
             byte[] write = new UTF8Encoding(true).GetBytes(value);
             fs.Write(write, 0, write.Length);
         }
+
         private double[] GetRow(double[,] matrix, int index)
         {
             double[] ret = new double[matrix.GetLength(1)];

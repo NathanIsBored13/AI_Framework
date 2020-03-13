@@ -1,12 +1,14 @@
 ﻿using System;
+
 namespace AI_Framework
 {
     class Layer
     {
         private double[,] weights;
         private double[] biases;
-        private int depth { get; }
+        private int depth;
         private Layer child;
+
         public Layer(int[] structure, int depth)
         {
             this.depth = depth;
@@ -25,6 +27,7 @@ namespace AI_Framework
                 }
             }
         }
+
         public Layer(File_Maneger file_maneger, int depth)
         {
             this.depth = depth;
@@ -34,6 +37,7 @@ namespace AI_Framework
             Console.WriteLine($"layer {depth} loaded");
             if (file_maneger.IsMore()) child = new Layer(file_maneger, depth + 1);
         }
+
         public double[] PropegateDown(double[] activation)
         {
             double[] buffer = new double[weights.GetLength(0)];
@@ -48,6 +52,7 @@ namespace AI_Framework
             if (child != null) buffer = child.PropegateDown(buffer);
             return buffer;
         }
+
         public void Export(File_Maneger file_Manager)
         {
             file_Manager.Export(depth, weights, biases);
