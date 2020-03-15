@@ -18,8 +18,8 @@ namespace AI_Framework
         public Neural_Network(string location)
         {
             File_Maneger file_maneger = new File_Maneger(location);
-            input = new Layer(file_maneger, 1);
             Structure = file_maneger.GetStructure();
+            input = new Layer(file_maneger, Structure, 1);
         }
 
         public double[] ComputeNetwork(double[] input)
@@ -40,6 +40,7 @@ namespace AI_Framework
             File_Maneger file_maneger = new File_Maneger(location);
             file_maneger.Erase();
             Console.WriteLine($"Erased folder at {location}");
+            file_maneger.WriteStructure(Structure);
             input.Export(file_maneger);
             Console.WriteLine("Compleated export");
         }

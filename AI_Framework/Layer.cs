@@ -28,14 +28,14 @@ namespace AI_Framework
             }
         }
 
-        public Layer(File_Maneger file_maneger, int depth)
+        public Layer(File_Maneger file_maneger, int[] structure, int depth)
         {
             this.depth = depth;
-            var buffer = file_maneger.ReadNext();
-            weights = buffer.Item1;
-            biases = buffer.Item2;
+            weights = new double[structure[depth], structure[depth - 1]];
+            biases = new double[structure[depth]];
+            file_maneger.LoadNext(weights, biases);
             Console.WriteLine($"layer {depth} loaded");
-            if (file_maneger.IsMore()) child = new Layer(file_maneger, depth + 1);
+            if (file_maneger.IsMore()) child = new Layer(file_maneger, structure, depth + 1);
         }
 
         public double[] PropegateDown(double[] activation)

@@ -6,55 +6,44 @@ namespace AI_Framework
 {
     class File_Maneger
     {
-        private const string seperator = ",";
-
-        private string address;
+        private string Address { get; }
         private int pointer = 0;
         private string[] files;
 
         public File_Maneger(string address)
         {
-            this.address = address;
-            files = Directory.GetFiles(address, @"*.csv");
+            Address = address;
+            files = Directory.GetFiles(address, @"LAYER-*.csv");
         }
 
         public int[] GetStructure()
         {
-            int[] ret = new int[files.Length + 1];
-            StreamReader sr = new StreamReader(files[0]);
-            ret[0] = Convert.ToInt32(sr.ReadLine().Split(seperator)[1]);
-            sr.Close();
-            for (int i = 0; i < files.Length; i++)
+            BinaryReader sr = new BinaryReader(File.Open($@"{Address}\Structure.csv", FileMode.Open));
+            int[] ret = new int[sr.ReadInt32()];
+            for (int i = 0; i < ret.Length; i++)
             {
-                sr = new StreamReader(files[i]);
-                ret[i + 1] = Convert.ToInt32(sr.ReadLine().Split(seperator)[0]);
-                sr.Close();
+                ret[i] = sr.ReadInt32();
             }
+            sr.Close();
             return ret;
         }
 
-        public Tuple<double[,], double[]> ReadNext()
+        public void LoadNext(double[,] weights, double[] biases)
         {
             Console.WriteLine($"read {files[pointer]}");
-            StreamReader sr = new StreamReader(files[pointer++]);
-            string[] buffer = sr.ReadLine().Split(seperator);
-            double[,] weights = new double[Convert.ToInt32(buffer[0]), Convert.ToInt32(buffer[1])];
-            double[] biases = new double[Convert.ToInt32(buffer[0])];
+            BinaryReader sr = new BinaryReader(File.Open(files[pointer++], FileMode.Open));
             for (int x = 0; x < weights.GetLength(0); x++)
             {
-                buffer = sr.ReadLine().Split(seperator);
                 for (int y = 0; y < weights.GetLength(1); y++)
                 {
-                    weights[x, y] = Convert.ToDouble(buffer[y]);
+                    weights[x, y] = sr.ReadDouble();
                 }
             }
-            buffer = sr.ReadLine().Split(seperator);
-            for (int i = 0; i < buffer.Length; i++)
+            for (int i = 0; i < biases.Length; i++)
             {
-                biases[i] = Convert.ToDouble(buffer[i]);
+                biases[i] = sr.ReadDouble();
             }
             sr.Close();
-            return new Tuple<double[,], double[]>(weights, biases);
         }
 
         public bool IsMore() => pointer < files.Length;
@@ -64,26 +53,29 @@ namespace AI_Framework
             foreach (string path in files) File.Delete(path);
         }
 
-        public void Export(int index, double[,] weights, double[] biases)
+        public void WriteStructure(int[] structure)
         {
-            FileStream fs = File.Create($@"{address}\LAYER-{index}.csv");
-            Write(fs, $"{weights.GetLength(0)}{seperator}{weights.GetLength(1)}\n");
-            for (int i = 0; i < weights.GetLength(0); i++) Write(fs, $"{string.Join(seperator, GetRow(weights, i))}\n");
-            Write(fs, string.Join(seperator, biases));
+            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\Structure.csv"));
+            fs.Write(structure.Length);
+            foreach (int i in structure) fs.Write(i);
             fs.Close();
         }
 
-        private void Write(FileStream fs, string value)
+        public void Export(int index, double[,] weights, double[] biases)
         {
-            byte[] write = new UTF8Encoding(true).GetBytes(value);
-            fs.Write(write, 0, write.Length);
-        }
-
-        private double[] GetRow(double[,] matrix, int index)
-        {
-            double[] ret = new double[matrix.GetLength(1)];
-            for (int i = 0; i < ret.Length; i++) ret[i] = matrix[index, i];
-            return ret;
+            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\LAYER-{index}.csv"));
+            for (int x = 0; x < weights.GetLength(0); x++)
+            {
+                for (int y = 0; y < weights.GetLength(1); y++)
+                {
+                    fs.Write(weights[x, y]);
+                }
+            }
+            for (int x = 0; x < weights.GetLength(0); x++)
+            {
+                fs.Write(biases[x]);
+            }
+            fs.Close();
         }
     }
 }
