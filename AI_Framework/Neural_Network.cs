@@ -22,27 +22,24 @@ namespace AI_Framework
             input = new Layer(file_maneger, Structure, 1);
         }
 
-        public double[] ComputeNetwork(double[] input)
-        {
-            buffer = this.input.PropegateDown(input);
-            return buffer;
-        }
+        public double[] ComputeNetwork(double[] input) => buffer = this.input.PropegateDown(input);
 
-        public double ComputeCost(int correct, int min, int max)
+        public double ComputeCost(double[] expected)
         {
             double ret = 0;
-            for (int i = 0; i < buffer.Length; i++) ret += Math.Pow(buffer[i] - (i == correct ? min : max), 2);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                ret += Math.Pow(buffer[i] - expected[i], 2);
+            }
             return ret;
-
         }
+
         public void Export(string location)
         {
             File_Maneger file_maneger = new File_Maneger(location);
             file_maneger.Erase();
-            Console.WriteLine($"Erased folder at {location}");
             file_maneger.WriteStructure(Structure);
             input.Export(file_maneger);
-            Console.WriteLine("Compleated export");
         }
     }
 }

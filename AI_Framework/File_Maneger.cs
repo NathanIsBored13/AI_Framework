@@ -8,17 +8,17 @@ namespace AI_Framework
     {
         private string Address { get; }
         private int pointer = 0;
-        private string[] files;
+        private readonly string[] files;
 
         public File_Maneger(string address)
         {
             Address = address;
-            files = Directory.GetFiles(address, @"LAYER-*.csv");
+            files = Directory.GetFiles(address, @"LAYER-*.ai");
         }
 
         public int[] GetStructure()
         {
-            BinaryReader sr = new BinaryReader(File.Open($@"{Address}\Structure.csv", FileMode.Open));
+            BinaryReader sr = new BinaryReader(File.Open($@"{Address}\Structure.ai", FileMode.Open));
             int[] ret = new int[sr.ReadInt32()];
             for (int i = 0; i < ret.Length; i++)
             {
@@ -30,7 +30,6 @@ namespace AI_Framework
 
         public void LoadNext(double[,] weights, double[] biases)
         {
-            Console.WriteLine($"read {files[pointer]}");
             BinaryReader sr = new BinaryReader(File.Open(files[pointer++], FileMode.Open));
             for (int x = 0; x < weights.GetLength(0); x++)
             {
@@ -55,7 +54,7 @@ namespace AI_Framework
 
         public void WriteStructure(int[] structure)
         {
-            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\Structure.csv"));
+            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\Structure.ai"));
             fs.Write(structure.Length);
             foreach (int i in structure) fs.Write(i);
             fs.Close();
@@ -63,7 +62,7 @@ namespace AI_Framework
 
         public void Export(int index, double[,] weights, double[] biases)
         {
-            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\LAYER-{index}.csv"));
+            BinaryWriter fs = new BinaryWriter(File.Create($@"{Address}\LAYER-{index}.ai"));
             for (int x = 0; x < weights.GetLength(0); x++)
             {
                 for (int y = 0; y < weights.GetLength(1); y++)

@@ -6,13 +6,12 @@ namespace AI_Framework
     {
         private double[,] weights;
         private double[] biases;
-        private int depth;
-        private Layer child;
+        private readonly int depth;
+        private readonly Layer child;
 
         public Layer(int[] structure, int depth)
         {
             this.depth = depth;
-            Console.WriteLine($"layer {depth} created");
             if (depth != structure.Length - 1) child = new Layer(structure, depth + 1);
             else child = null;
             biases = new double[structure[depth]];
@@ -34,7 +33,6 @@ namespace AI_Framework
             weights = new double[structure[depth], structure[depth - 1]];
             biases = new double[structure[depth]];
             file_maneger.LoadNext(weights, biases);
-            Console.WriteLine($"layer {depth} loaded");
             if (file_maneger.IsMore()) child = new Layer(file_maneger, structure, depth + 1);
         }
 
@@ -56,7 +54,6 @@ namespace AI_Framework
         public void Export(File_Maneger file_Manager)
         {
             file_Manager.Export(depth, weights, biases);
-            Console.WriteLine($"Exported layer {depth}");
             if (child != null) child.Export(file_Manager);
         }
     }
