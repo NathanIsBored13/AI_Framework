@@ -1,27 +1,52 @@
-﻿using System;
+﻿using AI_Framework;
+using System;
+using System.IO;
+using System.Linq;
 
-namespace AI_Framework
+namespace ReadMNIST
 {
     class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            Neural_Network network = new Neural_Network(new int[] { 2, 250, 1000, 250, 5 });
-            Console.WriteLine($"[{string.Join(", ", network.ComputeNetwork(new double[] { 0.6, 0.1 }))}]");
-            Console.WriteLine($"[{string.Join(", ", network.ComputeNetwork(new double[] { 0.1, 0.6 }))}]");
-            Console.WriteLine(network.ComputeCost(new double[] { 0.3, 0.0, 0.2, 0.4, 0.2 }));
-            Console.ReadLine();
+            Network_Pool networks = new Network_Pool(20, new int[] { 256, 20, 20, 10 });
+            networks.SetTrainingData(Load_Data());
+            Console.WriteLine(networks.Train(10));
+        }
 
-            network.Export(@"C:\Users\Nathan\Documents\AI");
-            Console.WriteLine("exported");
-            Console.ReadLine();
+        private static Entery[] Load_Data()
+        {
+            BinaryReader brLabels = new BinaryReader(new FileStream(@"C:\t10k-labels.idx1-ubyte", FileMode.Open));
+            BinaryReader brImages = new BinaryReader(new FileStream(@"C:\t10k-images.idx3-ubyte", FileMode.Open));
 
-            network = new Neural_Network(@"C:\Users\Nathan\Documents\AI");
-            Console.WriteLine($"[{string.Join(", ", network.Structure)}]");
-            Console.WriteLine($"[{string.Join(", ", network.ComputeNetwork(new double[] { 0.6, 0.1 }))}]");
-            Console.WriteLine($"[{string.Join(", ", network.ComputeNetwork(new double[] { 0.1, 0.6 }))}]");
-            Console.WriteLine(network.ComputeCost(new double[] { 0.3, 0.0, 0.2, 0.4, 0.2 }));
-            Console.ReadLine();
+            brImages.ReadBytes(4);
+            brLabels.ReadBytes(8);
+
+            int numImages = BtoLEndian(brImages.ReadBytes(4));
+            int numRows = BtoLEndian(brImages.ReadBytes(4));
+            int numCols = BtoLEndian(brImages.ReadBytes(4));
+
+            Entery[] ret = new Entery[numImages];
+            for (int i = 0; i < numImages; i++)
+            {
+                double[] input = new double[numRows * numCols];
+                double[] expected = new double[10];
+                for (int j = 0; j < numRows * numCols; j++)
+                {
+                    input[j] = brImages.ReadByte() / 256d;
+                }
+                expected[brLabels.ReadByte()] = 1;
+                ret[i] = new Entery(input, expected);
+            }
+            brImages.Close();
+            brLabels.Close();
+            return ret;
+        }
+
+        private static int BtoLEndian(byte[] i)
+        {
+            Array.Reverse(i);
+            return BitConverter.ToInt32(i, 0);
         }
     }
 }
